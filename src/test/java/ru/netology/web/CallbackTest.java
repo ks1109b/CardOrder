@@ -53,7 +53,7 @@ class CallbackTest {
         $("[data-test-id=phone] input").setValue("+79270000000");
         $("[data-test-id=agreement]").click();
         $("[type=button] span").click();
-        $("[data-test-id=name]").shouldHave(text("Имя и Фамилия указаные неверно. Допустимы только русские буквы, пробелы и дефисы."), cssValue("color", "rgba(255, 92, 92, 1)"));
+        $("[data-test-id=name]").shouldHave(text("Имя и Фамилия указаны неверно. Допустимы только русские буквы, пробелы и дефисы."), cssValue("color", "rgba(255, 92, 92, 1)"));
     }
 
     @Test
