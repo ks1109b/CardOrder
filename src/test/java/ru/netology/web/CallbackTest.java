@@ -5,14 +5,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static com.codeborne.selenide.Condition.*;
-import static com.codeborne.selenide.Selenide.$;
-import static com.codeborne.selenide.Selenide.open;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.codeborne.selenide.Selenide.*;
 
 class CallbackTest {
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
         open("http://localhost:9999");
     }
 
@@ -22,46 +20,88 @@ class CallbackTest {
         $("[data-test-id=phone] input").setValue("+79270000000");
         $("[data-test-id=agreement]").click();
         $("[type=button] span").click();
-        $("[data-test-id=order-success]").shouldHave(text("Ваша заявка успешно отправлена! Наш менеджер свяжется с вами в ближайшее время."));
+        $("[data-test-id=order-success]")
+                .shouldHave(text("Ваша заявка успешно отправлена! Наш менеджер свяжется с вами в ближайшее время."));
     }
 
     @Test
-    void shouldSendEmptyForm() {
+    void shouldGetErrorIfEmptyForm() {
         $("[type=button] span").click();
-        $("[data-test-id=name]").shouldHave(text("Поле обязательно для заполнения"), cssValue("color", "rgba(255, 92, 92, 1)"));
+        $("[data-test-id=name].input_invalid .input__sub")
+                .shouldHave(text("Поле обязательно для заполнения"));
     }
 
     @Test
-    void shouldSendFormIfOnlyName() {
-        $("[data-test-id=name] input").setValue("Евгений");
+    void shouldGetErrorIfFieldNameEmpty() {
+        $("[data-test-id=name] input").setValue("");
+        $("[data-test-id=phone] input").setValue("+79270000000");
+        $("[data-test-id=agreement]").click();
         $("[type=button] span").click();
-        $("[data-test-id=phone]").shouldHave(text("Поле обязательно для заполнения"), cssValue("color", "rgba(255, 92, 92, 1)"));
+        $("[data-test-id=name].input_invalid .input__sub")
+                .shouldHave(text("Поле обязательно для заполнения"));
     }
 
     @Test
-    void shouldSendFormWithoutAgreement() {
+    void shouldGetErrorIfFieldPhoneEmpty() {
+        $("[data-test-id=name] input").setValue("Василий Иванов-Петров");
+        $("[data-test-id=phone] input").setValue("");
+        $("[data-test-id=agreement]").click();
+        $("[type=button] span").click();
+        $("[data-test-id=phone].input_invalid .input__sub")
+                .shouldHave(text("Поле обязательно для заполнения"));
+    }
+
+    @Test
+    void shouldGetErrorIfNotAgreement() {
         $("[data-test-id=name] input").setValue("Евгений");
         $("[data-test-id=phone] input").setValue("+79270000000");
         $("[type=button] span").click();
-        String actual = $("span[class=checkbox__text]").getCssValue("color");
-        assertEquals("rgba(255, 92, 92, 1)", actual);
+        $("[data-test-id=agreement].input_invalid .checkbox__text")
+                .shouldBe(visible)
+                .shouldHave(text("Я соглашаюсь с условиями"));
     }
 
     @Test
-    void shouldSendFormWithInvalidName() {
+    void shouldGetErrorIfOnlyName() {
+        $("[data-test-id=name] input").setValue("Евгений");
+        $("[type=button] span").click();
+        $("[data-test-id=phone].input_invalid .input__sub")
+                .shouldHave(text("Поле обязательно для заполнения"));
+    }
+
+    @Test
+    void shouldGetErrorIfOnlyPhone() {
+        $("[data-test-id=phone] input").setValue("+79270000000");
+        $("[type=button] span").click();
+        $("[data-test-id=name].input_invalid .input__sub")
+                .shouldHave(text("Поле обязательно для заполнения"));
+    }
+
+    @Test
+    void shouldGetErrorIfOnlyAgreement() {
+        $("[data-test-id=agreement]").click();
+        $("[type=button] span").click();
+        $("[data-test-id=name].input_invalid .input__sub")
+                .shouldHave(text("Поле обязательно для заполнения"));
+    }
+
+    @Test
+    void shouldGetErrorIfInvalidName() {
         $("[data-test-id=name] input").setValue("Joe");
         $("[data-test-id=phone] input").setValue("+79270000000");
         $("[data-test-id=agreement]").click();
         $("[type=button] span").click();
-        $("[data-test-id=name]").shouldHave(text("Имя и Фамилия указаны неверно. Допустимы только русские буквы, пробелы и дефисы."), cssValue("color", "rgba(255, 92, 92, 1)"));
+        $("[data-test-id=name].input_invalid .input__sub")
+                .shouldHave(text("Имя и Фамилия указаны неверно. Допустимы только русские буквы, пробелы и дефисы."));
     }
 
     @Test
-    void shouldSendFormWithInvalidPhone() {
+    void shouldGetErrorIfInvalidPhone() {
         $("[data-test-id=name] input").setValue("Фикус");
-        $("[data-test-id=phone] input").setValue("+7927000000");
+        $("[data-test-id=phone] input").setValue("+7927");
         $("[data-test-id=agreement]").click();
         $("[type=button] span").click();
-        $("[data-test-id=phone]").shouldHave(text("Телефон указан неверно. Должно быть 11 цифр, например, +79012345678."), cssValue("color", "rgba(255, 92, 92, 1)"));
+        $("[data-test-id=phone].input_invalid .input__sub")
+                .shouldHave(text("Телефон указан неверно. Должно быть 11 цифр, например, +79012345678."));
     }
 }
